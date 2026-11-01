@@ -73,7 +73,7 @@ Feedback from users, developers, and security researchers is greatly appreciated
 
 For non-security-related bugs, unexpected behavior, or documentation errors, open a GitHub Issue:
 
-https://github.com/flozdrelx/DEEP-protocol/issues
+https://github.com/ml-snz/DEEP-protocol/issues
 
 Please include the affected version or commit, operating system, steps to reproduce the issue, expected and actual behavior, and relevant logs when available. Remove credentials, private keys, and other sensitive information before sharing logs.
 Before opening a new issue, please check whether the problem has already been reported. If a related issue exists, add any new reproduction details or evidence there instead of creating a duplicate.
