@@ -23,3 +23,5 @@ obj/
 *.user
 *.pdb
 *.WebView2/
+
+.serena/
