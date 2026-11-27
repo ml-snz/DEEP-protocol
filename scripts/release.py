@@ -94,6 +94,10 @@ def source_payloads():
     return payloads
 
 
+def release_version():
+    return re.search(r'const Version = "([^"]+)"', (ROOT / "protocol.go").read_text()).group(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=None)
@@ -102,7 +106,7 @@ def main():
     args = parser.parse_args()
     if len(set(args.targets)) != len(args.targets):
         parser.error("targets must be unique")
-    version = re.search(r'const Version = "([^"]+)"', (ROOT / "protocol.go").read_text()).group(1)
+    version = release_version()
     desktop = viewer_payloads(args.windows_viewer, version) if args.windows_viewer else None
     if desktop and "windows/amd64" not in args.targets:
         parser.error("--windows-viewer requires the windows/amd64 target")

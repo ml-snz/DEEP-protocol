@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"time"
@@ -16,18 +17,20 @@ import (
 // JSON on stdin keeps cookies and form values out of command-line arguments.
 func requestResource(ctx context.Context, args []string, input io.Reader, out, diagnostic io.Writer) error {
 	if len(args) == 1 && (args[0] == "--help" || args[0] == "-h") {
-		fmt.Fprintln(out, "Usage: deep request deep://node.network/ --config client.json --info < request.json")
+		fmt.Fprintln(out, "Usage: deep request deep://node.network/ [--config client.json] [--desktop] --info < request.json")
 		return nil
 	}
 	if len(args) == 0 {
 		return errors.New("usage: deep request deep://node.network/ --config client.json --info < request.json")
 	}
 	uri := args[0]
-	if _, err := deep.ParseURI(uri); err != nil {
+	parsed, err := deep.ParseURI(uri)
+	if err != nil {
 		return err
 	}
 	flags := newFlags("deep request", diagnostic)
 	config := flags.String("config", "client.json", "Network and adapter registry")
+	desktop := flags.Bool("desktop", false, "Use the active HellNode desktop session for .hell links when enabled")
 	info := flags.Bool("info", false, "Write verified response metadata to stderr")
 	timeout := flags.Duration("timeout", 30*time.Second, "Time limit per operation")
 	limit := flags.Int64("max-bytes", deep.MaxApplicationResponseBytes, "Response byte limit (at most 16 MiB)")
@@ -58,11 +61,15 @@ func requestResource(ctx context.Context, args []string, input io.Reader, out, d
 		return errors.New("body must be canonical base64 of at most 1 MiB")
 	}
 	request := deep.ApplicationRequest{Method: inputRequest.Method, Headers: inputRequest.Headers, Body: payload}
-	client, err := deep.LoadClientConfig(*config)
+	client, err := loadDesktopClient(parsed, *config, *desktop)
 	if err != nil {
 		return err
 	}
-	client.Timeout = *timeout
+	flags.Visit(func(f *flag.Flag) {
+		if f.Name == "timeout" {
+			client.Timeout = *timeout
+		}
+	})
 	client.MaxBytes = *limit
 	var body bytes.Buffer
 	result, err := client.Exchange(ctx, uri, request, &body)

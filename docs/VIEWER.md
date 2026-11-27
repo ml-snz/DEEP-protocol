@@ -1,6 +1,7 @@
 # DEEP website viewer
 
-DEEP 3.0.0 provides an opt-in Windows viewer with the app/1 profile.
+DEEP 3.1.0 includes the opt-in Windows viewer with the app/1 profile. For Firefox
+and Chromium-based browsers, see the [browser integration guide](BROWSER-INTEGRATION.md).
 Use DEEP's optional application provider for local port hosting; native content folders remain supported.
 See [application hosting](APPLICATIONS.md) for forms, sessions, and limits.
 The CLI, protocol library, and servers remain available on Windows, Linux, and
@@ -38,7 +39,7 @@ Reload, Home, Ctrl+L, and F5 are available. There is no browser proxy to configu
 Register links after building/copying the viewer:
 
 ~~~powershell
-.\scripts\register.ps1 -Executable .\bin\deep.exe
+.\scripts\register.ps1 -Executable .\bin\deep.exe -LegacyViewer
 ~~~
 
 The script upgrades the existing terminal handler belonging to that same DEEP

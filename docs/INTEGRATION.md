@@ -1,13 +1,16 @@
-# Integrating DEEP 3.0.0 into a browser or program
+# Integrating DEEP 3.1.0 into a browser or program
 
 DEEP is a protocol backend. Its Go library, server, resource client, application
 requests, identity validation, and network adapters work without WebView2, .NET,
-or the bundled viewer. Version 2.3 retains wire version 2, ALPN deep/2, app/1,
+or the bundled viewer. Version 3.1.0 retains wire version 2, ALPN deep/2, app/1,
 and existing network configuration and keys.
 
 The optional Windows viewer is a separate reference frontend. It is disabled
 by default, including when its files are installed. An enabled viewer setting
 does not affect backend requests, authentication, or which app owns deep:// links.
+
+For desktop link registration and in-tab browser integration, see the
+[browser integration guide](BROWSER-INTEGRATION.md).
 
 ## Command-line integration (any language)
 
@@ -31,7 +34,7 @@ On successful transport, stdout contains the verified body and stderr contains
 one JSON result with status, headers, media_type, size, sha256, and security.
 An application 404 or 500 is still a valid response: inspect status. On a
 nonzero process exit, discard output; stderr is a human-readable diagnostic,
-not a successful JSON result. Version 2.3 does not promise machine-readable
+not a successful JSON result. The CLI does not promise machine-readable
 error codes for all CLI failures.
 
 A minimal Python integration, without the viewer:
@@ -116,15 +119,15 @@ The bundled viewer is not a service that other browsers need to run.
 
 ## URI handler ownership
 
-Enabling or disabling the viewer does not register a URI handler. Your browser
-can register itself as the deep:// handler through its own installation/settings.
+Register the desktop link handler separately from the legacy viewer preference.
 
-DEEP's optional Windows register.ps1 registers deep.exe open-uri, which honors
-the viewer setting on each launch. It refuses to replace an unrelated handler
+On Windows, register.ps1 registers deep.exe open-browser-uri by default.
+The -LegacyViewer switch registers deep.exe open-uri, which honors the viewer
+setting on each launch. It refuses to replace an unrelated handler
 unless explicitly run with -ReplaceExisting. A previous direct-viewer handler
 belonging to the same DEEP installation can be migrated safely. -WhatIf previews
 registration without changing the registry.
 
-When the viewer is disabled, browse/open-uri return a clear error without
-fetching the link. The explicit preview command still provides a terminal
-resource preview. DEEP never launches a different browser implicitly.
+When the legacy viewer is disabled, `browse` and `open-uri` return an error.
+The browser handler uses `open-browser-uri`. The `preview` command provides a
+terminal resource preview.

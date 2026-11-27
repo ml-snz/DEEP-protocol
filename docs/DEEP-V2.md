@@ -2,7 +2,7 @@
 
 **Name:** Decentralized Extensible Endpoint Protocol.  
 **Application and framing version:** 2.  
-**Reference implementation:** 3.0.0 (wire version remains 2).
+**Reference implementation:** 3.1.0 (wire version remains 2).
 
 **Status:** official DEEP project release specification. No public Internet registration or external audit is implied.  
 **License:** Apache 2.0.

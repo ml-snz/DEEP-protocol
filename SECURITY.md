@@ -1,6 +1,6 @@
 # DEEP security
 
-DEEP 3.0.1 provides authenticated resource transfer with explicit trust configuration and bounded server operation. Security primitives come from Go's standard library. Use Go 1.27.1 or later and keep the toolchain patched when rebuilding.
+DEEP 3.1.0 provides authenticated resource transfer with explicit trust configuration and bounded server operation. Security primitives come from Go's standard library. Use Go 1.27.1 or later and keep the toolchain patched when rebuilding.
 
 This release has automated security and interoperability tests. It has not received an independent cryptographic or deployment audit. The exact checks performed locally are recorded in [Validation](docs/VALIDATION-V3.md).
 

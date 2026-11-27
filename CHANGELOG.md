@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.1.0 - 2026-26-11
+
+- Add desktop `deep://` link registration on Linux and Windows and select the
+  supported system-default browser.
+- Open websites in isolated Firefox or Chromium-based browser windows. DEEP
+  applies the configured proxy or adapter and verifies site responses before
+  rendering.
+- Document how browsers can hand links to DEEP or implement a native in-tab
+  scheme loader.
+- Preserve wire and configuration version 2, app/1, Proxy/1, and existing
+  identities.
+
 ## 3.0.1 - 2026-10-08
 
 - Route the optional application provider to the selected local Host instead
@@ -13,7 +25,7 @@
   HTTPS trust, and verified application 404 responses in regression tests.
 - Preserve wire/configuration version 2, app/1, Proxy/1, and existing identities.
 
-## 3.0.0 � 2026-10-03
+## 3.0.0 - 2026-10-03
 
 - Prevent the optional loopback application provider from silently replaying
   submitted actions when a response is lost.

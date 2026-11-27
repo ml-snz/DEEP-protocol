@@ -4,7 +4,9 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$Executable,
-    [switch]$ReplaceExisting
+    [switch]$ReplaceExisting,
+    [switch]$Browser,
+    [switch]$LegacyViewer
 )
 
 $ErrorActionPreference = 'Stop'
@@ -29,17 +31,23 @@ $viewer = Join-Path ([IO.Path]::GetDirectoryName($resolvedExecutable)) 'viewer/D
 # Always dispatch through the backend so viewer enable/disable takes effect.
 # Recognize the older direct-viewer handler only for this exact installation.
 $legacyViewerCommand = '"' + $viewer + '" --deep "' + $resolvedExecutable + '" --config "' + $configuration + '" --uri "%1"'
-$command = $terminalCommand
+$browserCommand = '"' + $resolvedExecutable + '" open-browser-uri "%1"'
+if ($Browser -and $LegacyViewer) {
+    throw 'Choose either browser mode or -LegacyViewer.'
+}
+$command = if ($LegacyViewer) { $terminalCommand } else { $browserCommand }
 if (Test-Path -LiteralPath $schemeKey) {
     $existingCommand = $null
     if (Test-Path -LiteralPath $commandKey) {
         $existingCommand = (Get-Item -LiteralPath $commandKey).GetValue('')
     }
-    if ($existingCommand -ne $command -and $existingCommand -ne $legacyViewerCommand -and -not $ReplaceExisting) {
+    $knownCommand = $existingCommand -in @($terminalCommand, $legacyViewerCommand, $browserCommand)
+    if (-not $knownCommand -and -not $ReplaceExisting) {
         throw 'deep:// already has another handler. Use -ReplaceExisting to explicitly replace it with DEEP.'
     }
 }
-if (-not $PSCmdlet.ShouldProcess('Current-user deep:// handler', 'Register DEEP backend dispatcher')) { return }
+$mode = if ($LegacyViewer) { 'Windows viewer' } else { 'desktop browser' }
+if (-not $PSCmdlet.ShouldProcess('Current-user deep:// handler', "Register DEEP for the $mode")) { return }
 [void](New-Item -Path $schemeKey -Force)
 Set-Item -LiteralPath $schemeKey -Value 'URL:DEEP Protocol'
 [void](New-ItemProperty -LiteralPath $schemeKey -Name 'URL Protocol' -Value '' -PropertyType String -Force)
@@ -47,4 +55,8 @@ Set-Item -LiteralPath $schemeKey -Value 'URL:DEEP Protocol'
 Set-Item -LiteralPath $commandKey -Value $command
 Write-Host "deep:// registered for the current user with $resolvedExecutable"
 Write-Host "Client configuration: $configuration"
-Write-Host "The viewer remains opt-in: deep viewer enable. External browsers can register their own handler."
+if (-not $LegacyViewer) {
+    Write-Host "Links will open in Firefox or a Chromium-based browser in an isolated DEEP window."
+} else {
+    Write-Host "The legacy viewer remains opt-in: deep viewer enable. To use a desktop browser, rerun without -LegacyViewer."
+}

@@ -1,12 +1,12 @@
-# DEEP 3.0.1
+# DEEP 3.1.0
 
-**Decentralized Extensible Endpoint Protocol - release 3.0.1**
+**Decentralized Extensible Endpoint Protocol - release 3.1.0**
 
 DEEP transfers resources through `deep://node.network/path` addresses using its own versioned messages. Networks plug in through adapters. The protocol is independent of HTTP and any particular network; a network integrates with DEEP rather than becoming part of its core.
 
 The compatible wire version 2 profile requires **TLS 1.3**, hybrid **X25519 + ML-KEM-768** key establishment, and **ML-DSA-65** server authentication. Private nodes also require an authorized ML-DSA-65 client identity. The executable includes a client, file server, identity tools, and a local demo.
 
-Release 3.0.1 fixes local website routing for Caddy and other servers: the local Host and same-origin values match the selected backend URL. The optional application provider accepts localhost and loopback HTTP(S) origins, including IPv6. Wire version 2, configuration version 2, existing identities, app/1, and Proxy/1 remain compatible. It has automated validation and a documented threat model; it has not received an external security audit and is not an IETF-approved or publicly registered Internet standard.
+DEEP 3.1.0 adds desktop `deep://` link handling and isolated browsing through Firefox or Chromium-based browsers. HellNode can route registered `.hell` links through its connected session. Wire version 2, configuration version 2, existing identities, app/1, and Proxy/1 remain compatible. It has automated validation and a documented threat model; it has not received an external security audit and is not an IETF-approved or publicly registered Internet standard.
 
 ### Security and Privacy Notice
 
@@ -15,15 +15,64 @@ DEEP does **not** provide anonymous routing or protection against traffic analys
 Do not assume that DEEP provides anonymity or rely on it as the sole protection for sensitive communications. See [SECURITY.md](SECURITY.md) for the threat model, security limitations, and vulnerability reporting instructions.
 Automated tests and validation results help identify defects but do not establish that the implementation is free of vulnerabilities or that its security guarantees hold under all deployment conditions.
 
-## Upgrading to 3.0.1
+## Upgrading to 3.1.0
 
 Keep your existing configuration, certificates, keys, and proxy/viewer preferences.
 No identity regeneration or JSON version changes are required. Restart running
 DEEP programs after replacing the executable and, if used, the complete viewer.
 HellNet users need **HellNet 3.3.1+** for release-version compatibility; earlier
 HellNet versions reject a 3.x executable. See [the release and upgrade guide](docs/RELEASE-V3.md).
-For the updated local website menu, use HellNet 3.3.2 and DEEP 3.0.1 on the
-hosting computer. Existing DEEP 3.x visitors use the same wire protocol.
+For desktop `.hell` links, use a HellNode build that supports browser links.
+Existing DEEP 3.x visitors use the same wire protocol.
+
+## Open deep:// links in a browser
+
+If you ship a browser and want to add `deep://` support, follow the
+[browser integration guide](docs/BROWSER-INTEGRATION.md).
+
+Install Firefox, Chromium, Chrome, Brave, or Edge. Install the DEEP executable
+at a stable path and put your trusted client configuration in `config.json`
+beside it. If DEEP needs a native network proxy, configure it there using
+`deep proxy set --address IP:PORT`; keep that proxy running while browsing.
+
+Register the handler once as your desktop user. On Linux, this uses
+`xdg-mime` from `xdg-utils`:
+
+```sh
+deep browser-register
+```
+
+On Windows, run this from the DEEP distribution folder:
+
+```powershell
+.\scripts\register.ps1 -Executable .\bin\deep.exe
+```
+
+Type a full address such as `deep://node.alpha/` into your browser's address
+bar. Allow the browser to open the DEEP handler if prompted. DEEP opens the site
+in a new browser window with an isolated profile. The address shown in that
+window is a temporary local address. If your browser searches for the link,
+or your desktop is missing a scheme handler, open it directly:
+
+```sh
+deep browser deep://node.alpha/ --config client.json
+```
+
+On Linux and Windows, DEEP uses your system-default browser when supported.
+A desktop link supplies the URL, so a link opened from a non-default browser
+can still open in the default browser. Every browser uses the same DEEP client
+configuration. DEEP configures the temporary browser profile automatically. Set
+`DEEP_BROWSER` to the absolute path of a supported browser executable to
+choose a specific browser. Use a native browser install if a sandboxed
+package cannot access the temporary profile. On macOS, use `deep browser`
+directly. Use `deep preview` on a headless host.
+
+Each window uses a loopback bridge scoped to one DEEP authority. DEEP applies
+the configured adapters or native proxy, checks the peer identity, and
+verifies responses before rendering. Same-site relative links, assets and
+forms use that bridge. It rejects ordinary web traffic and external
+redirects. In a connected HellNode terminal, use `open LINK` to give DEEP that
+session's proxy configuration. The desktop handler uses its own config file.
 
 ## Backend and optional viewer
 
@@ -216,13 +265,13 @@ DEEP does not implement automatic DHT discovery, global name ownership, or anony
 
 ## Optional Windows link handler
 
-To open `deep://` links using the console viewer, place a working client configuration at `bin/config.json`. Identity paths in that copy must still resolve correctly; copying a private configuration to another directory does not copy its credentials or adjust relative paths.
+To open `deep://` links using the legacy Windows viewer, place a working client configuration at `bin/config.json`. Identity paths in that copy must still resolve correctly; copying a private configuration to another directory does not copy its credentials or adjust relative paths.
 
 ```powershell
-.\scripts\register.ps1 -Executable .\bin\deep.exe
+.\scripts\register.ps1 -Executable .\bin\deep.exe -LegacyViewer
 ```
 
-Use `-ReplaceExisting` only when replacing another registered handler. The script registers the current user only and is never run automatically by the build. When installed, the graphical viewer opens websites and their same-origin assets. CLI-only installations display an escaped terminal preview of at most 1 MiB. See the [viewer guide](docs/VIEWER.md) for the desktop profile and its limits.
+The command above selects the optional Windows viewer. Use `-ReplaceExisting` to replace a handler from another application or installation. Registration applies to the current user. See the [viewer guide](docs/VIEWER.md) for the legacy viewer.
 
 ## Validation and distribution
 

@@ -20,7 +20,7 @@ import (
 	deep "deepprotocol"
 )
 
-const usage = `DEEP 3.0.1 - protocol backend with an optional viewer
+const usage = "DEEP " + deep.Version + ` - protocol backend with an optional viewer
 
 Usage:
   deep version
@@ -30,11 +30,14 @@ Usage:
   deep inspect --certificate node-alpha/identity.crt
   deep serve --config node-alpha/server.json
   deep fetch deep://node.alpha/ --config node-alpha/client.json [--output file] [--info]
-  deep request deep://node.alpha/ --config client.json --info < request.json
+  deep request deep://node.alpha/ [--config client.json] [--desktop] --info < request.json
   deep proxy set --address IP:PORT [--config client.json]
   deep proxy [status|unset] [--config client.json] [--json]
   deep viewer [status|enable|disable] [--json]
   deep browse [deep://node.alpha/] [--config client.json]
+  deep browser deep://node.alpha/ [--config client.json]
+  deep browser-register [--replace-existing]
+  deep open-browser-uri deep://node.alpha/
   deep preview deep://node.alpha/ [--config client.json]
   deep open-uri deep://node.alpha/
 
@@ -97,6 +100,18 @@ func run(ctx context.Context, args []string, out, diagnostic io.Writer) error {
 		return viewerCommand(args[1:], out, diagnostic)
 	case "browse":
 		return browseURI(ctx, args[1:], diagnostic)
+	case "browser":
+		return browserCommand(ctx, args[1:], os.Stdin, out, diagnostic)
+	case "browser-register":
+		return registerBrowser(ctx, args[1:], out, diagnostic)
+	case "open-browser-uri":
+		if len(args) != 2 {
+			return errors.New("open-browser-uri accepts exactly one URI, without options")
+		}
+		if _, err := deep.ParseURI(args[1]); err != nil {
+			return err
+		}
+		return browserCommand(ctx, []string{args[1], "--desktop"}, os.Stdin, out, diagnostic)
 	case "preview":
 		return previewCommand(ctx, args[1:], out, diagnostic)
 	case "open-uri":

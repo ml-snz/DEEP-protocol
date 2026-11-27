@@ -1,6 +1,6 @@
-# DEEP 3.0.1 release and upgrade
+# DEEP 3.1.0 release and upgrade
 
-DEEP 3.0.1 is the reference implementation release number. The interoperable
+DEEP 3.1.0 is the reference implementation version. The interoperable
 wire format remains version 2 with ALPN deep/2; configuration files keep
 version: 2. The application profile remains app/1 and the native proxy remains
 Proxy/1. Existing 2.x identities, server pins, direct adapters, and configuration
@@ -8,11 +8,15 @@ remain usable. Do not regenerate keys or change a JSON version to 3.
 
 ## What changed
 
-This patch fixes local website routing for Caddy and other servers. The optional
-application provider sends the selected local Host and same-origin values,
-accepts localhost as well as numeric loopbacks, and supports trusted HTTPS.
-The backend and optional viewer share version 3.0.1. The viewer's renderer
-tests accept verified application 404 responses as well as native DEEP errors.
+DEEP 3.1.0 registers `deep://` links on Linux and Windows and opens them in an
+isolated Firefox or Chromium-based window. It uses the system-default browser
+when supported. The browser bridge uses the configured DEEP client and verifies
+page, asset, and form responses. A connected HellNode session can supply the
+proxy for desktop `.hell` links. See the [browser integration guide](BROWSER-INTEGRATION.md).
+
+The 3.0.1 local website routing fixes for Caddy and other servers carry forward,
+including loopback HTTP(S) upstreams and same-origin header handling. The
+backend and optional legacy Windows viewer share version 3.1.0.
 
 The 3.0.0 fixes remain: no silent replay of submitted actions, validated resource
 components, aligned viewer URI validation, and graceful SIGTERM shutdown.
@@ -56,7 +60,7 @@ build it also creates a Windows desktop ZIP:
 
 ~~~powershell
 .\scripts\build.ps1 -WithViewer
-python .\scripts\release.py --windows-viewer .\bin\viewer --output .\dist\v3.0.1
+python .\scripts\release.py --windows-viewer .\bin\viewer --output .\dist\v3.1.0
 ~~~
 
 The output directory must not exist. BUILD-MANIFEST.json records target,

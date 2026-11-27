@@ -3,10 +3,17 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from xml.etree import ElementTree
 import release
 
 class ReleaseTests(unittest.TestCase):
+    def test_viewer_project_matches_backend_version(self):
+        project = release.ROOT / "viewer/DEEP.Viewer/DEEP.Viewer.csproj"
+        viewer_version = ElementTree.parse(project).findtext("./PropertyGroup/Version")
+        self.assertEqual(viewer_version, release.release_version())
+
     def test_desktop_payload_requires_matching_build_and_excludes_user_data(self):
+        version = release.release_version()
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary)
             files={
@@ -18,9 +25,9 @@ class ReleaseTests(unittest.TestCase):
             }
             for name,data in files.items():
                 path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
-            deps={"runtimeTarget":{"name":".NETCoreApp,Version=v10.0/win-x64"},"libraries":{"DEEP.Viewer/3.0.0":{}}}
+            deps={"runtimeTarget":{"name":".NETCoreApp,Version=v10.0/win-x64"},"libraries":{f"DEEP.Viewer/{version}":{}}}
             (root/"DEEP.Viewer.deps.json").write_text(json.dumps(deps))
-            payload=release.viewer_payloads(root,"3.0.0")
+            payload=release.viewer_payloads(root,version)
             self.assertIn("bin/viewer/runtime.dll",payload)
             self.assertIn("bin/viewer/icudtl.dat",payload)
             self.assertIn("bin/viewer/licenses/DEEP-LICENSE.txt",payload)
@@ -29,7 +36,7 @@ class ReleaseTests(unittest.TestCase):
             with self.assertRaises(ValueError):release.viewer_payloads(root,"2.3.3")
             deps["runtimeTarget"]["name"]=".NETCoreApp,Version=v10.0/win-arm64"
             (root/"DEEP.Viewer.deps.json").write_text(json.dumps(deps))
-            with self.assertRaises(ValueError):release.viewer_payloads(root,"3.0.0")
+            with self.assertRaises(ValueError):release.viewer_payloads(root,version)
 
     def test_source_contains_policy_tests_and_no_generated_profiles(self):
         payload=release.source_payloads()

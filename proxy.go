@@ -146,6 +146,10 @@ func DialProxy(ctx context.Context, endpoint Endpoint) (net.Conn, error) {
 }
 
 func proxyHandshake(ctx context.Context, address string, timeout time.Duration, request ProxyRequest) (net.Conn, ProxyResponse, error) {
+	return proxyHandshakeWithDialer(ctx, address, timeout, request, (&net.Dialer{}).DialContext)
+}
+
+func proxyHandshakeWithDialer(ctx context.Context, address string, timeout time.Duration, request ProxyRequest, dial func(context.Context, string, string) (net.Conn, error)) (net.Conn, ProxyResponse, error) {
 	var response ProxyResponse
 	if err := ValidateProxyAddress(address); err != nil {
 		return nil, response, err
@@ -158,7 +162,7 @@ func proxyHandshake(ctx context.Context, address string, timeout time.Duration, 
 	}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	connection, err := (&net.Dialer{}).DialContext(ctx, "tcp", address)
+	connection, err := dial(ctx, "tcp", address)
 	if err != nil {
 		return nil, response, fmt.Errorf("DEEP proxy unavailable at %s; check that the configured proxy is running: %w", address, err)
 	}
